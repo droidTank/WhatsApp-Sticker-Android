@@ -1,0 +1,47 @@
+{
+  "android_play_store_link": "",
+  "ios_app_store_link": "",
+  "sticker_packs": [
+    {
+      "identifier": "1",
+      "name": "Cuppy",
+      "publisher": "Jane Doe",
+      "tray_image_file": "tray_Cuppy.png",
+      "tray_image_url": "https://firebasestorage.googleapis.com/v0/b/what-s-sticker-app.appspot.com/o/stickers%2Fpacks%2F1%2Fpack.png?alt=media&token=7af33a16-2b3e-4362-98af-34c818e44cf8",
+      "publisher_email":"",
+      "publisher_website": "",
+      "privacy_policy_website": "",
+      "license_agreement_website": "",
+      "size":1010,
+      "stickers": [
+        {
+          "image_file": "01_Cuppy_smile.webp",
+          "emojis": ["☕","🙂"],
+          "url":"https://firebasestorage.googleapis.com/v0/b/what-s-sticker-app.appspot.com/o/stickers%2Fpacks%2F1%2F1.webp?alt=media&token=dafcd7ce-527b-4cc4-b7c1-cbd105b919bb"
+
+        },
+        {
+          "image_file": "02_Cuppy_lol.webp",
+          "emojis": ["😄","😀"],
+          "url":"https://firebasestorage.googleapis.com/v0/b/what-s-sticker-app.appspot.com/o/stickers%2Fpacks%2F1%2F2.webp?alt=media&token=a3d0d0f2-05c7-41fb-81ae-9a7a79d2ed00"
+
+        },
+        {
+          "image_file": "03_Cuppy_rofl.webp",
+          "emojis": ["😆","😂"],
+          "url":"https://firebasestorage.googleapis.com/v0/b/what-s-sticker-app.appspot.com/o/stickers%2Fpacks%2F1%2F3.webp?alt=media&token=d6bc66c0-8be0-4479-a561-87978396fc6d"
+        },
+        {
+          "image_file": "04_Cuppy_sad.webp",
+          "emojis": ["😩","😰"],
+          "url":"https://firebasestorage.googleapis.com/v0/b/what-s-sticker-app.appspot.com/o/stickers%2Fpacks%2F1%2F4.webp?alt=media&token=4ace682d-8edb-43ce-b39d-351e6303ed8b"
+        },
+        {
+          "image_file": "05_Cuppy_cry.webp",
+          "emojis": ["😭","💧"],
+          "url":"https://firebasestorage.googleapis.com/v0/b/what-s-sticker-app.appspot.com/o/stickers%2Fpacks%2F1%2F5.webp?alt=media&token=e1fbc614-fc85-4043-b379-9e4ac7c3eff9"
+        }
+      ]
+    }
+  ]
+}
