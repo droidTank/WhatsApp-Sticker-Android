@@ -26,6 +26,7 @@ import android.util.Log;
 import com.example.samplestickerapp.BuildConfig;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.utils.AppPrefManager;
 import com.facebook.binaryresource.BinaryResource;
 import com.facebook.binaryresource.FileBinaryResource;
 import com.facebook.cache.common.CacheKey;
@@ -34,6 +35,7 @@ import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.facebook.imagepipeline.request.ImageRequest;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -87,7 +89,6 @@ public class StickerContentProvider extends ContentProvider {
     static final String STICKERS_ASSET = "stickers_asset";
     private static final int STICKERS_ASSET_CODE = 4;
 
-    private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
 
     private List<StickerPack> stickerPackList;
 
@@ -107,12 +108,16 @@ public class StickerContentProvider extends ContentProvider {
         //gets the list of stickers for a sticker pack, * respresent the identifier.
         MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE);
 
-        for (StickerPack stickerPack : getStickerPackList()) {
+        MATCHER.addURI(authority, STICKERS_ASSET +  "/*" + "/*", STICKERS_ASSET_CODE);
+
+        // TODO: 4/3/19  customize
+       /* for (StickerPack stickerPack : getStickerPackList()) {
             MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE);
             for (Sticker sticker : stickerPack.getStickers()) {
                 MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
             }
-        }
+        }*/
+
 
         return true;
     }
@@ -136,7 +141,7 @@ public class StickerContentProvider extends ContentProvider {
     @Override
     public ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode) {
         final int matchCode = MATCHER.match(uri);
-        if (matchCode == STICKERS_ASSET_CODE || matchCode == STICKER_PACK_TRAY_ICON_CODE) {
+        if (matchCode == STICKERS_ASSET_CODE ) {
             return getImageAsset(uri);
         }
         return null;
@@ -154,16 +159,14 @@ public class StickerContentProvider extends ContentProvider {
             case STICKERS_CODE:
                 return "vnd.android.cursor.dir/vnd." + BuildConfig.CONTENT_PROVIDER_AUTHORITY + "." + STICKERS;
             case STICKERS_ASSET_CODE:
-                return "image/webp";
-            case STICKER_PACK_TRAY_ICON_CODE:
-                return "image/png";
+                return getFileType(uri);
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
     }
 
     private synchronized void readContentFile(@NonNull Context context) {
-        try (InputStream contentsInputStream = context.getAssets().open(CONTENT_FILE_NAME)) {
+        try (InputStream contentsInputStream = new FileInputStream(AppPrefManager.getInstance(context).getString(AppPrefManager.JSON_FILE_PATH))) {
             stickerPackList = ContentFileParser.parseStickerPacks(contentsInputStream);
         } catch (IOException | IllegalStateException e) {
             e.printStackTrace();
@@ -244,6 +247,37 @@ public class StickerContentProvider extends ContentProvider {
         return cursor;
     }
 
+    private  String getFileType(Uri uri){
+        final List<String> pathSegments = uri.getPathSegments();
+        if (pathSegments.size() != 3) {
+            throw new IllegalArgumentException("path segments should be 3, uri is: " + uri);
+        }
+        String fileName = pathSegments.get(pathSegments.size() - 1);
+        final String identifier = pathSegments.get(pathSegments.size() - 2);
+        if (TextUtils.isEmpty(identifier)) {
+            throw new IllegalArgumentException("identifier is empty, uri: " + uri);
+        }
+        if (TextUtils.isEmpty(fileName)) {
+            throw new IllegalArgumentException("file name is empty, uri: " + uri);
+        }
+        //making sure the file that is trying to be fetched is in the list of stickers.
+        for (StickerPack stickerPack : getStickerPackList()) {
+            if (identifier.equals(stickerPack.getIdentifier())) {
+                if (fileName.equals(stickerPack.getTrayImageFile())) {
+                    return "image/webp";
+                } else {
+                    for (Sticker sticker : stickerPack.getStickers()) {
+                        if (fileName.equals(sticker.getImageFileName())) {
+                            return "image/png";
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+
+    }
+
     private ParcelFileDescriptor getImageAsset(Uri uri) throws IllegalArgumentException {
         final List<String> pathSegments = uri.getPathSegments();
         if (pathSegments.size() != 3) {
@@ -282,8 +316,6 @@ public class StickerContentProvider extends ContentProvider {
             return ParcelFileDescriptor.open(file,MODE_READ_ONLY);
         } catch (IOException e) {
             Log.e(Objects.requireNonNull(getContext()).getPackageName(), "IOException when getting asset file, uri:" + uri, e);
-
-
             return null;
         }
     }

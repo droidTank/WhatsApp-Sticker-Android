@@ -20,28 +20,29 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.samplestickerapp.BuildConfig;
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.StickerApplication;
 import com.example.samplestickerapp.model.Sticker;
+import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.provider.StickerPackLoader;
+import com.example.samplestickerapp.ui.base.BaseActivity;
 import com.example.samplestickerapp.ui.detail.StickerPackDetailsActivity;
 import com.example.samplestickerapp.ui.home.StickerPackListActivity;
-import com.example.samplestickerapp.provider.StickerPackLoader;
+import com.example.samplestickerapp.utils.AppPrefManager;
 import com.example.samplestickerapp.utils.StickerPackValidator;
-import com.example.samplestickerapp.model.StickerPack;
-import com.example.samplestickerapp.ui.base.BaseActivity;
 import com.facebook.binaryresource.BinaryResource;
 import com.facebook.binaryresource.FileBinaryResource;
 import com.facebook.cache.common.CacheKey;
-import com.facebook.common.references.CloseableReference;
-import com.facebook.datasource.DataSource;
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
-import com.facebook.imagepipeline.core.ImagePipeline;
 import com.facebook.imagepipeline.core.ImagePipelineFactory;
-import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.request.ImageRequest;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -59,10 +60,15 @@ import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EntryActivity extends BaseActivity {
+    private static final String TAG = EntryActivity.class.getSimpleName();
     private View progressBar;
     private LoadListAsyncTask loadListAsyncTask;
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
+
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,10 +78,14 @@ public class EntryActivity extends BaseActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+        setRemoteConfig();
+
+    }
+
+    private void initData() {
         progressBar = findViewById(R.id.entry_activity_progress);
         loadListAsyncTask = new LoadListAsyncTask(this);
         loadListAsyncTask.execute();
-
     }
 
     private void showStickerPack(ArrayList<StickerPack> stickerPackList) {
@@ -111,16 +121,16 @@ public class EntryActivity extends BaseActivity {
         }
     }
 
-    void downloadFile() {
+    void downloadMainJsonFile() {
+        String stickerFileName = mFirebaseRemoteConfig.getString("sticker_file_name");
         StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-
-        File stickersJsonFile = new File(getFilesDir(), "stickers.json");
-        if (!stickersJsonFile.exists())
-            mStorageRef.child("stickers").child("data").child("stickers-v1.json").getFile(stickersJsonFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+        File stickersJsonFile = new File(getFilesDir(), stickerFileName);
+        if (!stickersJsonFile.exists()||true)
+            mStorageRef.child("stickers").child("data").child(stickerFileName).getFile(stickersJsonFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    Toast.makeText(EntryActivity.this, "file ", Toast.LENGTH_SHORT).show();
-
+                    AppPrefManager.getInstance(getApplicationContext()).putString(AppPrefManager.JSON_FILE_PATH, stickersJsonFile.getAbsolutePath());
+                    initData();
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -129,83 +139,51 @@ public class EntryActivity extends BaseActivity {
                     Toast.makeText(EntryActivity.this, "error ", Toast.LENGTH_SHORT).show();
                 }
             });
+        else
+            initData();
     }
 
-
-    public static void downloadStickers(StickerPack pack){
-        File opDir=new File(StickerApplication.getAppContext().getFilesDir(),pack.getIdentifier());
-        downloadSticker(pack.getTrayImageUrl(),pack.getTrayImageFile(),opDir);
-        for (Sticker sticker:pack.getStickers()){
-            downloadSticker(sticker.getImageUrl(),sticker.getImageFileName(),opDir);
+    void setRemoteConfig() {
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("sticker_file_name", "stickers-v1.json");
+        mFirebaseRemoteConfig.setDefaults(map);
+        long cacheExpiration = 3600;// 1 hrs
+        if (mFirebaseRemoteConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 1000;
         }
-    }
+        mFirebaseRemoteConfig.fetch(cacheExpiration)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            // After config data is successfully fetched, it must be activated before newly fetched
+                            // values are returned.
+                            mFirebaseRemoteConfig.activateFetched();
+                            Log.i(TAG, "Fetch Succeeded: ");
+                            Toast.makeText(EntryActivity.this, "Fetch Succeeded", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.i(TAG, "Fetch Failed: ");
+                            Toast.makeText(EntryActivity.this, "Fetch Failed", Toast.LENGTH_SHORT).show();
 
-   public static void downloadSticker(String imageUrl,String fileName,File opDir){
-        ImageRequest imageRequest=ImageRequest.fromUri(imageUrl);
-        CacheKey cacheKey= DefaultCacheKeyFactory.getInstance()
-                .getEncodedCacheKey(imageRequest, StickerApplication.getAppContext());
-        BinaryResource resource = ImagePipelineFactory.getInstance().getMainFileCache().getResource(cacheKey);
-        File file=((FileBinaryResource)resource).getFile();
-        if (file!=null){
-            copyFile(file,new File(opDir,fileName));
-        }else {
-            downloadFile(imageUrl,new File(opDir,fileName));
-        }
+                        }
+                        downloadMainJsonFile();
 
-
-    }
-
-
-
-    private static void downloadFile(String url, File outputFile) {
-        try {
-            URL u = new URL(url);
-            URLConnection conn = u.openConnection();
-            int contentLength = conn.getContentLength();
-            DataInputStream stream = new DataInputStream(u.openStream());
-            byte[] buffer = new byte[contentLength];
-            stream.readFully(buffer);
-            stream.close();
-
-            DataOutputStream fos = new DataOutputStream(new FileOutputStream(outputFile));
-            fos.write(buffer);
-            fos.flush();
-            fos.close();
-        } catch(FileNotFoundException e) {
-            return; // swallow a 404
-        } catch (IOException e) {
-            return; // swallow a 404
-        }
-    }
-
-    public static void copyFile(File inputFile, File outputPath) {
-
-        InputStream in;
-        OutputStream out;
-        try {
-            if (!outputPath.getParentFile().exists()) {
-                outputPath.getParentFile().mkdirs();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(EntryActivity.this, "error occured", Toast.LENGTH_SHORT).show();
             }
-            in = new FileInputStream( inputFile);
-            out = new FileOutputStream( outputPath);
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            out.flush();
-            out.close();
+        });
 
-        }  catch (FileNotFoundException fnfe1) {
-            Log.e("tag", fnfe1.getMessage());
-        }
-        catch (Exception e) {
-            Log.e("tag", e.getMessage());
-        }
 
     }
-
 
     static class LoadListAsyncTask extends AsyncTask<Void, Void, Pair<String, ArrayList<StickerPack>>> {
         private final WeakReference<EntryActivity> contextWeakReference;
@@ -226,7 +204,9 @@ public class EntryActivity extends BaseActivity {
                     }
                     for (StickerPack stickerPack : stickerPackList) {
                         StickerPackValidator.verifyStickerPackValidity(context, stickerPack);
+
                     }
+
                     return new Pair<>(null, stickerPackList);
                 } else {
                     return new Pair<>("could not fetch sticker packs", null);

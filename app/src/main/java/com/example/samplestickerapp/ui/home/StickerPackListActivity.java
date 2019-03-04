@@ -74,7 +74,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
 
 
     private final StickerPackListAdapter.OnAddButtonClickedListener onAddButtonClickedListener = pack -> {
-        addStickerPackToWhatsApp(pack.getIdentifier(), pack.getName());
+        addStickerPackToWhatsApp(pack);
     };
 
     private void recalculateColumnCount() {

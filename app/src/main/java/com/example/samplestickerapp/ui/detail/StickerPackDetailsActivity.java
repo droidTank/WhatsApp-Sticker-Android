@@ -16,7 +16,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.Formatter;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +25,6 @@ import android.widget.TextView;
 
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.utils.StickerPackInfoActivity;
-import com.example.samplestickerapp.provider.StickerPackLoader;
 import com.example.samplestickerapp.utils.WhitelistCheck;
 import com.example.samplestickerapp.model.StickerPack;
 
@@ -86,7 +84,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         packTrayIcon.setImageURI(Uri.parse(stickerPack.getTrayImageUrl()));
 
         packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
-        addButton.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier(), stickerPack.getName()));
+        addButton.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(showUpButton);
             getSupportActionBar().setTitle(showUpButton ? R.string.title_activity_sticker_pack_details_multiple_pack : R.string.title_activity_sticker_pack_details_single_pack);
