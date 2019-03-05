@@ -8,7 +8,7 @@
 
 package com.example.samplestickerapp.ui.detail;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import com.example.samplestickerapp.R;

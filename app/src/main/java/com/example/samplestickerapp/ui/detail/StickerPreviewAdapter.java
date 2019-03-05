@@ -8,14 +8,13 @@
 
 package com.example.samplestickerapp.ui.detail;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.samplestickerapp.R;
-import com.example.samplestickerapp.provider.StickerPackLoader;
 import com.example.samplestickerapp.model.StickerPack;
 
 public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewViewHolder> {

@@ -13,8 +13,8 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.format.Formatter;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -24,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.example.samplestickerapp.R;
-import com.example.samplestickerapp.provider.StickerPackLoader;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.ui.detail.StickerPackDetailsActivity;
 import com.facebook.drawee.view.SimpleDraweeView;
