@@ -107,7 +107,7 @@ public class EntryActivity extends BaseActivity {
         String stickerFileName = mFirebaseRemoteConfig.getString("sticker_file_name");
         StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
         File stickersJsonFile = new File(getFilesDir(), stickerFileName);
-        if (!stickersJsonFile.exists()||true)
+        if (!stickersJsonFile.exists())
             mStorageRef.child("stickers").child("data").child(stickerFileName).getFile(stickersJsonFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
@@ -119,6 +119,7 @@ public class EntryActivity extends BaseActivity {
                 public void onFailure(@NonNull Exception e) {
                     e.printStackTrace();
                     Toast.makeText(EntryActivity.this, "error ", Toast.LENGTH_SHORT).show();
+                    initData();
                 }
             });
         else

@@ -27,6 +27,7 @@ import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.ui.detail.StickerPackDetailsActivity;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.google.android.flexbox.FlexboxLayout;
 
 import java.util.List;
 
@@ -71,7 +72,7 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
         for (int i = 0; i < actualNumberOfStickersToShow; i++) {
             final SimpleDraweeView rowImage = (SimpleDraweeView) LayoutInflater.from(context).inflate(R.layout.sticker_pack_list_item_image, viewHolder.imageRowView, false);
             rowImage.setImageURI(Uri.parse(pack.getStickers().get(i).getImageUrl()));
-            final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) rowImage.getLayoutParams();
+            final FlexboxLayout.LayoutParams lp = (FlexboxLayout.LayoutParams) rowImage.getLayoutParams();
             final int marginBetweenImages = (viewHolder.imageRowView.getMeasuredWidth() - maxNumberOfStickersInARow * viewHolder.imageRowView.getContext().getResources().getDimensionPixelSize(R.dimen.sticker_pack_list_item_preview_image_size)) / (maxNumberOfStickersInARow - 1) - lp.leftMargin - lp.rightMargin;
             if (i != actualNumberOfStickersToShow - 1 && marginBetweenImages > 0) { //do not set the margin for the last image
                 lp.setMargins(lp.leftMargin, lp.topMargin, lp.rightMargin + marginBetweenImages, lp.bottomMargin);
@@ -110,6 +111,7 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
     }
 
     void setMaxNumberOfStickersInARow(int maxNumberOfStickersInARow) {
+        maxNumberOfStickersInARow=2*maxNumberOfStickersInARow;
         if (this.maxNumberOfStickersInARow != maxNumberOfStickersInARow) {
             this.maxNumberOfStickersInARow = maxNumberOfStickersInARow;
             notifyDataSetChanged();

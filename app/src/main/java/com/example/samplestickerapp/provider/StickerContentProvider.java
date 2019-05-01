@@ -73,7 +73,6 @@ public class StickerContentProvider extends ContentProvider {
     private static final UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     static final String METADATA = "metadata";
     private static final int METADATA_CODE = 1;
-
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
 
     static final String STICKERS = "stickers";

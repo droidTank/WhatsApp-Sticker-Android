@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.samplestickerapp.R;
+import com.google.android.flexbox.FlexboxLayout;
 
 public class StickerPackListItemViewHolder extends RecyclerView.ViewHolder {
 
@@ -23,7 +24,7 @@ public class StickerPackListItemViewHolder extends RecyclerView.ViewHolder {
     TextView publisherView;
     TextView filesizeView;
     ImageView addButton;
-    LinearLayout imageRowView;
+    FlexboxLayout imageRowView;
 
     StickerPackListItemViewHolder(final View itemView) {
         super(itemView);
