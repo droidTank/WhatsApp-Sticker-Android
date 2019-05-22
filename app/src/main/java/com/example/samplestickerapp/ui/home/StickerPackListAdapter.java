@@ -16,6 +16,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,13 +72,15 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
         int actualNumberOfStickersToShow = Math.min(maxNumberOfStickersInARow, pack.getStickers().size());
         for (int i = 0; i < actualNumberOfStickersToShow; i++) {
             final SimpleDraweeView rowImage = (SimpleDraweeView) LayoutInflater.from(context).inflate(R.layout.sticker_pack_list_item_image, viewHolder.imageRowView, false);
-            rowImage.setImageURI(Uri.parse(pack.getStickers().get(i).getImageUrl()));
+
             final FlexboxLayout.LayoutParams lp = (FlexboxLayout.LayoutParams) rowImage.getLayoutParams();
             final int marginBetweenImages = (viewHolder.imageRowView.getMeasuredWidth() - maxNumberOfStickersInARow * viewHolder.imageRowView.getContext().getResources().getDimensionPixelSize(R.dimen.sticker_pack_list_item_preview_image_size)) / (maxNumberOfStickersInARow - 1) - lp.leftMargin - lp.rightMargin;
             if (i != actualNumberOfStickersToShow - 1 && marginBetweenImages > 0) { //do not set the margin for the last image
                 lp.setMargins(lp.leftMargin, lp.topMargin, lp.rightMargin + marginBetweenImages, lp.bottomMargin);
                 rowImage.setLayoutParams(lp);
             }
+            rowImage.setImageURI(pack.getStickers().get(i).getImageUrl());
+            Log.i("aaa", "onBindViewHolder: ="+pack.getStickers().get(i).getImageUrl()+"-");
             viewHolder.imageRowView.addView(rowImage);
         }
         setAddButtonAppearance(viewHolder.addButton, pack);

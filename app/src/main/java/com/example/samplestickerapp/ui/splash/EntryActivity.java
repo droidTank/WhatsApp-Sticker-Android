@@ -14,6 +14,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -22,7 +24,9 @@ import android.widget.Toast;
 
 import com.example.samplestickerapp.BuildConfig;
 import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.fcm.MyFirebaseMessagingService;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.provider.StickerContentProvider;
 import com.example.samplestickerapp.provider.StickerPackLoader;
 import com.example.samplestickerapp.ui.base.BaseActivity;
 import com.example.samplestickerapp.ui.detail.StickerPackDetailsActivity;
@@ -33,14 +37,21 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -61,10 +72,13 @@ public class EntryActivity extends BaseActivity {
             getSupportActionBar().hide();
         }
         setRemoteConfig();
+        MyFirebaseMessagingService.checkAndSentFcmToken();
 
     }
 
     private void initData() {
+        FirebaseMessaging.getInstance().subscribeToTopic("all");
+        StickerContentProvider.reinit=true;
         progressBar = findViewById(R.id.entry_activity_progress);
         loadListAsyncTask = new LoadListAsyncTask(this);
         loadListAsyncTask.execute();
@@ -154,7 +168,6 @@ public class EntryActivity extends BaseActivity {
                             Toast.makeText(EntryActivity.this, "Fetch Failed", Toast.LENGTH_SHORT).show();
 
                         }
-                        downloadMainJsonFile();
 
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -165,6 +178,84 @@ public class EntryActivity extends BaseActivity {
             }
         });
 
+        new DownloadFileFromURL(this).execute();
+
+
+    }
+
+   static class DownloadFileFromURL extends AsyncTask<String, String, String> {
+
+
+        WeakReference<EntryActivity> activityWeakReference;
+
+       public DownloadFileFromURL(EntryActivity entryActivity) {
+           this.activityWeakReference = new WeakReference<>(entryActivity);
+       }
+
+       /**
+         * Before starting background thread
+         * */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            System.out.println("Starting download");
+        }
+
+        /**
+         * Downloading file in background thread
+         * */
+        @Override
+        protected String doInBackground(String... f_url) {
+            File stickersJsonFile = new File(activityWeakReference.get().getFilesDir(), "demo1.json");
+            int count;
+            try {
+                System.out.println("Downloading");
+                //URL url = new URL("https://stickerappdemo.herokuapp.com/stickers");
+                URL url = new URL("https://01cb3df7.ngrok.io/stickers");
+                URLConnection conection = url.openConnection();
+                conection.connect();
+                // getting file length
+                int lenghtOfFile = conection.getContentLength();
+
+                // input stream to read file - with 8k buffer
+                InputStream input = new BufferedInputStream(url.openStream(), 8192);
+                // Output stream to write file
+
+                OutputStream output = new FileOutputStream(stickersJsonFile);
+                byte[] data = new byte[1024];
+
+                long total = 0;
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    // writing data to file
+                    output.write(data, 0, count);
+
+                }
+                // flushing output
+                output.flush();
+                // closing streams
+                output.close();
+                input.close();
+                AppPrefManager.getInstance(activityWeakReference.get().getApplicationContext()).putString(AppPrefManager.JSON_FILE_PATH, stickersJsonFile.getAbsolutePath());
+
+            } catch (Exception e) {
+                Log.e("Error: ", e.getMessage());
+            }
+
+            return null;
+        }
+
+
+
+        /**
+         * After completing background task
+         * **/
+        @Override
+        protected void onPostExecute(String file_url) {
+            System.out.println("Downloaded");
+            activityWeakReference.get().initData();
+
+        }
 
     }
 

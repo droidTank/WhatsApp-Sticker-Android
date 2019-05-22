@@ -62,7 +62,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
         allStickerPacksListAdapter = new StickerPackListAdapter(stickerPackList, onAddButtonClickedListener);
         packRecyclerView.setAdapter(allStickerPacksListAdapter);
         packLayoutManager = new LinearLayoutManager(this);
-        packLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        packLayoutManager.setOrientation(RecyclerView.VERTICAL);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 packRecyclerView.getContext(),
                 packLayoutManager.getOrientation()

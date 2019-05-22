@@ -9,6 +9,7 @@
 package com.example.samplestickerapp.provider;
 
 import androidx.annotation.NonNull;
+
 import android.text.TextUtils;
 import android.util.JsonReader;
 
@@ -19,11 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ContentFileParser {
 
-    private static final int LIMIT_EMOJI_COUNT = 2;
 
     @NonNull
     static List<StickerPack> parseStickerPacks(@NonNull InputStream contentsInputStream) throws IOException, IllegalStateException {
@@ -37,25 +38,13 @@ public class ContentFileParser {
         List<StickerPack> stickerPackList = new ArrayList<>();
         String androidPlayStoreLink = null;
         String iosAppStoreLink = null;
-        reader.beginObject();
-        while (reader.hasNext()) {
-            String key = reader.nextName();
-            if ("android_play_store_link".equals(key)) {
-                androidPlayStoreLink = reader.nextString();
-            } else if ("ios_app_store_link".equals(key)) {
-                iosAppStoreLink = reader.nextString();
-            } else if ("sticker_packs".equals(key)) {
-                reader.beginArray();
-                while (reader.hasNext()) {
-                    StickerPack stickerPack = readStickerPack(reader);
-                    stickerPackList.add(stickerPack);
-                }
-                reader.endArray();
-            } else {
-                throw new IllegalStateException("unknown field in json: " + key);
+
+            reader.beginArray();
+            while (reader.hasNext()) {
+                StickerPack stickerPack = readStickerPack(reader);
+                stickerPackList.add(stickerPack);
             }
-        }
-        reader.endObject();
+            reader.endArray();
         if (stickerPackList.size() == 0) {
             throw new IllegalStateException("sticker pack list cannot be empty");
         }
@@ -71,7 +60,7 @@ public class ContentFileParser {
         reader.beginObject();
         String identifier = null;
         String name = null;
-        String publisher = null;
+        String publisher = "sticker";
         String trayImageFile = null;
         String publisherEmail = null;
         String publisherWebsite = null;
@@ -83,29 +72,11 @@ public class ContentFileParser {
         while (reader.hasNext()) {
             String key = reader.nextName();
             switch (key) {
-                case "identifier":
+                case "id":
                     identifier = reader.nextString();
                     break;
                 case "name":
                     name = reader.nextString();
-                    break;
-                case "publisher":
-                    publisher = reader.nextString();
-                    break;
-                case "tray_image_file":
-                    trayImageFile = reader.nextString();
-                    break;
-                case "publisher_email":
-                    publisherEmail = reader.nextString();
-                    break;
-                case "publisher_website":
-                    publisherWebsite = reader.nextString();
-                    break;
-                case "privacy_policy_website":
-                    privacyPolicyWebsite = reader.nextString();
-                    break;
-                case "license_agreement_website":
-                    licenseAgreementWebsite = reader.nextString();
                     break;
                 case "stickers":
                     stickerList = readStickers(reader);
@@ -120,14 +91,12 @@ public class ContentFileParser {
                     reader.skipValue();
             }
         }
+        trayImageFile = name + ".png";
         if (TextUtils.isEmpty(identifier)) {
             throw new IllegalStateException("identifier cannot be empty");
         }
         if (TextUtils.isEmpty(name)) {
             throw new IllegalStateException("name cannot be empty");
-        }
-        if (TextUtils.isEmpty(publisher)) {
-            throw new IllegalStateException("publisher cannot be empty");
         }
         if (TextUtils.isEmpty(trayImageFile)) {
             throw new IllegalStateException("tray_image_file cannot be empty");
@@ -150,42 +119,43 @@ public class ContentFileParser {
     private static List<Sticker> readStickers(@NonNull JsonReader reader) throws IOException, IllegalStateException {
         reader.beginArray();
         List<Sticker> stickerList = new ArrayList<>();
-
         while (reader.hasNext()) {
             reader.beginObject();
             String imageFile = null;
-            List<String> emojis = new ArrayList<>(LIMIT_EMOJI_COUNT);
             String imageUrl = null;
             while (reader.hasNext()) {
                 final String key = reader.nextName();
-                if ("image_file".equals(key)) {
+                if ("file_name".equals(key)) {
                     imageFile = reader.nextString();
-                } else if ("url".equals(key)) {
+                } else if ("file_url".equals(key)) {
                     imageUrl = reader.nextString();
-                } else if ("emojis".equals(key)) {
-                    reader.beginArray();
-                    while (reader.hasNext()) {
-                        String emoji = reader.nextString();
-                        emojis.add(emoji);
-                    }
-                    reader.endArray();
                 } else {
-                    throw new IllegalStateException("unknown field in json: " + key);
+                    reader.skipValue();
                 }
             }
             reader.endObject();
             if (TextUtils.isEmpty(imageFile)) {
                 throw new IllegalStateException("sticker image_file cannot be empty");
             }
-            if (!imageFile.endsWith(".webp")) {
+            if (imageFile != null && !imageFile.endsWith(".webp")) {
                 throw new IllegalStateException("image file for stickers should be webp files, image file is: " + imageFile);
             }
-            if (imageFile.contains("..") || imageFile.contains("/")) {
+            if (imageFile != null && (imageFile.contains("..") || imageFile.contains("/"))) {
                 throw new IllegalStateException("the file name should not contain .. or / to prevent directory traversal, image file is:" + imageFile);
             }
-            stickerList.add(new Sticker(imageFile, emojis, imageUrl));
+            stickerList.add(new Sticker(imageFile, getEmojis(stickerList.size()), imageUrl));
         }
         reader.endArray();
         return stickerList;
+    }
+
+    private static List<String> getEmojis(int pos) {
+        String[] group1 = {
+                "😀", "😁", "😂", "😃", "😄", "😅", "😆", "😉", "😊", "😋"};
+        String[] group2 = {
+                "😥", "😮", "😯", "😪", "😫", "😴", "😌", "😛", "😜", "😝"};
+        int i = pos / 10;
+        int j = pos % 10;
+        return Arrays.asList(group1[i], group2[j]);
     }
 }

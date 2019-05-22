@@ -63,7 +63,6 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         boolean showUpButton = getIntent().getBooleanExtra(EXTRA_SHOW_UP_BUTTON, false);
         stickerPack = getIntent().getParcelableExtra(EXTRA_STICKER_PACK_DATA);
         TextView packNameTextView = findViewById(R.id.pack_name);
-        TextView packPublisherTextView = findViewById(R.id.author);
         ImageView packTrayIcon = findViewById(R.id.tray_image);
         TextView packSizeTextView = findViewById(R.id.pack_size);
 
@@ -80,7 +79,6 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
             recyclerView.setAdapter(stickerPreviewAdapter);
         }
         packNameTextView.setText(stickerPack.getName());
-        packPublisherTextView.setText(stickerPack.getPublisher());
         packTrayIcon.setImageURI(Uri.parse(stickerPack.getTrayImageUrl()));
 
         packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));

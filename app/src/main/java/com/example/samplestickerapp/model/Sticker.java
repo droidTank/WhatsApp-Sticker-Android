@@ -11,9 +11,12 @@ package com.example.samplestickerapp.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Sticker implements Parcelable {
+
+
     private String imageFileName;
     private List<String> emojis;
     private String imageUrl;

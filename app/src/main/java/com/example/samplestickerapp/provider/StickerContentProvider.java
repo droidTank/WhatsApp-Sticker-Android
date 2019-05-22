@@ -63,7 +63,6 @@ public class StickerContentProvider extends ContentProvider {
     //my
     public static final String STICKER_FILE_URL = "sticker_url";
 
-    public static final String CONTENT_FILE_NAME = "contents.json";
 
     public static Uri AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();
 
@@ -158,17 +157,20 @@ public class StickerContentProvider extends ContentProvider {
     }
 
     private synchronized void readContentFile(@NonNull Context context) {
-        try (InputStream contentsInputStream = new FileInputStream(AppPrefManager.getInstance(context).getString(AppPrefManager.JSON_FILE_PATH))) {
+        String string = AppPrefManager.getInstance(context).getString(AppPrefManager.JSON_FILE_PATH);
+        try (InputStream contentsInputStream = new FileInputStream(string)) {
             stickerPackList = ContentFileParser.parseStickerPacks(contentsInputStream);
         } catch (IOException | IllegalStateException e) {
             e.printStackTrace();
-            throw new RuntimeException(CONTENT_FILE_NAME + " file has some issues: " + e.getMessage(), e);
+            throw new RuntimeException(string + " file has some issues: " + e.getMessage(), e);
         }
     }
+    public  static  boolean reinit;
 
     public List<StickerPack> getStickerPackList() {
-        if (stickerPackList == null) {
+        if (stickerPackList == null||reinit) {
             readContentFile(Objects.requireNonNull(getContext()));
+            reinit=false;
         }
         return stickerPackList;
     }
