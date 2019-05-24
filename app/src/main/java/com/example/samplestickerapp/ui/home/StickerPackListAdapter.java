@@ -114,7 +114,7 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
     }
 
     void setMaxNumberOfStickersInARow(int maxNumberOfStickersInARow) {
-        maxNumberOfStickersInARow=2*maxNumberOfStickersInARow;
+        maxNumberOfStickersInARow=1*maxNumberOfStickersInARow;
         if (this.maxNumberOfStickersInARow != maxNumberOfStickersInARow) {
             this.maxNumberOfStickersInARow = maxNumberOfStickersInARow;
             notifyDataSetChanged();

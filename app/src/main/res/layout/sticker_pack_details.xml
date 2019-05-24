@@ -113,7 +113,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:background="@drawable/btn_green"
+            android:background="@drawable/btn_green_gra_normal"
             android:clickable="true"
             android:focusable="true">
 

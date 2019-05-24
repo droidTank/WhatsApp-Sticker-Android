@@ -210,13 +210,10 @@ public class EntryActivity extends BaseActivity {
             int count;
             try {
                 System.out.println("Downloading");
-                //URL url = new URL("https://stickerappdemo.herokuapp.com/stickers");
-                URL url = new URL("https://01cb3df7.ngrok.io/stickers");
+                URL url = new URL("http://192.168.1.116:3000/stickers");
                 URLConnection conection = url.openConnection();
                 conection.connect();
-                // getting file length
                 int lenghtOfFile = conection.getContentLength();
-
                 // input stream to read file - with 8k buffer
                 InputStream input = new BufferedInputStream(url.openStream(), 8192);
                 // Output stream to write file

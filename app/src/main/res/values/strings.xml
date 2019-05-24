@@ -41,4 +41,7 @@
     <!-- Toast text when we could not take user to play store because they don't have Google Play app installed -->
     <string name="cannot_find_play_store">Google Play is not installed on the device.</string>
     <string name="default_notification_channel_id">sticker</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
