@@ -11,21 +11,20 @@ package com.example.samplestickerapp.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import android.text.format.Formatter;
+
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.example.samplestickerapp.R;
-import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.data.local.entities.StickerPack;
 import com.example.samplestickerapp.ui.detail.StickerPackDetailsActivity;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.flexbox.FlexboxLayout;
@@ -56,9 +55,8 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
     @Override
     public void onBindViewHolder(@NonNull final StickerPackListItemViewHolder viewHolder, final int index) {
         StickerPack pack = stickerPacks.get(index);
-        final Context context = viewHolder.publisherView.getContext();
-        viewHolder.publisherView.setText(pack.getPublisher());
-        viewHolder.filesizeView.setText(Formatter.formatShortFileSize(context, pack.getTotalSize()));
+        final Context context = viewHolder.filesizeView.getContext();
+        viewHolder.filesizeView.setText("Downloads:"+ pack.getDownload());
 
         viewHolder.titleView.setText(pack.getName());
         viewHolder.container.setOnClickListener(view -> {
@@ -80,25 +78,20 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
                 rowImage.setLayoutParams(lp);
             }
             rowImage.setImageURI(pack.getStickers().get(i).getImageUrl());
-            Log.i("aaa", "onBindViewHolder: ="+pack.getStickers().get(i).getImageUrl()+"-");
+            Log.i("aaa", "onBindViewHolder: =" + pack.getStickers().get(i).getImageUrl() + "-");
             viewHolder.imageRowView.addView(rowImage);
         }
         setAddButtonAppearance(viewHolder.addButton, pack);
     }
 
     private void setAddButtonAppearance(ImageView addButton, StickerPack pack) {
-        if (pack.getIsWhitelisted()) {
-            addButton.setImageResource(R.drawable.sticker_3rdparty_added);
-            addButton.setClickable(false);
-            addButton.setOnClickListener(null);
-            setBackground(addButton, null);
-        } else {
-            addButton.setImageResource(R.drawable.sticker_3rdparty_add);
-            addButton.setOnClickListener(v -> onAddButtonClickedListener.onAddButtonClicked(pack));
-            TypedValue outValue = new TypedValue();
-            addButton.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-            addButton.setBackgroundResource(outValue.resourceId);
-        }
+
+        addButton.setImageResource(R.drawable.ic_favorite_border);
+        addButton.setOnClickListener(v -> onAddButtonClickedListener.onAddButtonClicked(pack));
+        TypedValue outValue = new TypedValue();
+        addButton.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        addButton.setBackgroundResource(outValue.resourceId);
+
     }
 
     private void setBackground(View view, Drawable background) {
@@ -108,13 +101,14 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
             view.setBackgroundDrawable(background);
         }
     }
+
     @Override
     public int getItemCount() {
         return stickerPacks.size();
     }
 
     void setMaxNumberOfStickersInARow(int maxNumberOfStickersInARow) {
-        maxNumberOfStickersInARow=1*maxNumberOfStickersInARow;
+        maxNumberOfStickersInARow = 1 * maxNumberOfStickersInARow;
         if (this.maxNumberOfStickersInARow != maxNumberOfStickersInARow) {
             this.maxNumberOfStickersInARow = maxNumberOfStickersInARow;
             notifyDataSetChanged();

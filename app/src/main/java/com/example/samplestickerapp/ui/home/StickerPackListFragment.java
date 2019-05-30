@@ -1,6 +1,7 @@
 package com.example.samplestickerapp.ui.home;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,10 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import com.example.samplestickerapp.R;
-import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.data.local.entities.StickerPack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +55,9 @@ public class StickerPackListFragment extends Fragment implements StickerPackList
             mParam1 = getArguments().getString(VIEW_STYLE);
             stickerPackList = getArguments().getParcelableArrayList(EXTRA_STICKER_PACK_LIST_DATA);
         }
-        showStickerPackList(stickerPackList);
+        if (stickerPackList==null)
+            stickerPackList=new ArrayList<>();
+
     }
 
     @Override
@@ -66,6 +70,7 @@ public class StickerPackListFragment extends Fragment implements StickerPackList
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         packRecyclerView = view.findViewById(R.id.sticker_pack_list);
+        showStickerPackList(stickerPackList);
     }
 
     private void showStickerPackList(List<StickerPack> stickerPackList) {
@@ -74,7 +79,19 @@ public class StickerPackListFragment extends Fragment implements StickerPackList
         packLayoutManager = new LinearLayoutManager(requireContext());
         packLayoutManager.setOrientation(RecyclerView.VERTICAL);
         packRecyclerView.setLayoutManager(packLayoutManager);
-        packRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(this::recalculateColumnCount);
+        packRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                StickerPackListFragment.this.recalculateColumnCount();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    packRecyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+                else {
+                    packRecyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+
+                }
+            }
+        });
     }
 
     private void recalculateColumnCount() {

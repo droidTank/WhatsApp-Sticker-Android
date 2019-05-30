@@ -26,7 +26,7 @@ import android.widget.TextView;
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.utils.StickerPackInfoActivity;
 import com.example.samplestickerapp.utils.WhitelistCheck;
-import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.data.local.entities.StickerPack;
 
 import java.lang.ref.WeakReference;
 

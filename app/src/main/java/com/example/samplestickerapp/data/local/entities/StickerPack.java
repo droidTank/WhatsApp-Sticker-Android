@@ -6,14 +6,24 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp.model;
+package com.example.samplestickerapp.data.local.entities;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 import java.util.List;
 
+@Entity(tableName = StickerPack.TABLE_NAME)
 public class StickerPack implements Parcelable {
+
+    public static final String TABLE_NAME = "sticker_pack";
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
     public static final Creator<StickerPack> CREATOR = new Creator<StickerPack>() {
         @Override
         public StickerPack createFromParcel(Parcel in) {
@@ -36,8 +46,10 @@ public class StickerPack implements Parcelable {
     private String trayImageUrl;
     private String iosAppStoreLink;
     private String androidPlayStoreLink;
+    @Ignore
     private List<Sticker> stickers;
     private long totalSize;
+    private long download;
     private boolean isWhitelisted;
 
     public StickerPack(String identifier, String name, String publisher, String trayImageFile, String publisherEmail, String publisherWebsite, String privacyPolicyWebsite, String licenseAgreementWebsite) {
@@ -65,12 +77,10 @@ public class StickerPack implements Parcelable {
         androidPlayStoreLink = in.readString();
         stickers = in.createTypedArrayList(Sticker.CREATOR);
         totalSize = in.readLong();
+        download = in.readLong();
         isWhitelisted = in.readByte() != 0;
     }
 
-    public boolean getIsWhitelisted() {
-        return isWhitelisted;
-    }
 
     public void setIsWhitelisted(boolean isWhitelisted) {
         this.isWhitelisted = isWhitelisted;
@@ -112,6 +122,7 @@ public class StickerPack implements Parcelable {
         dest.writeString(androidPlayStoreLink);
         dest.writeTypedList(stickers);
         dest.writeLong(totalSize);
+        dest.writeLong(download);
         dest.writeByte((byte) (isWhitelisted ? 1 : 0));
     }
 
@@ -191,7 +202,20 @@ public class StickerPack implements Parcelable {
         return isWhitelisted;
     }
 
-    public void setWhitelisted(boolean whitelisted) {
-        isWhitelisted = whitelisted;
+
+    public long getDownload() {
+        return download;
+    }
+
+    public void setDownload(long download) {
+        this.download = download;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

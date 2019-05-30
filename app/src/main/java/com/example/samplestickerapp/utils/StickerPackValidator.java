@@ -17,10 +17,9 @@ import android.util.Log;
 import android.util.Patterns;
 import android.webkit.URLUtil;
 
-import com.example.samplestickerapp.model.Sticker;
-import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.data.local.entities.Sticker;
+import com.example.samplestickerapp.data.local.entities.StickerPack;
 import com.example.samplestickerapp.provider.StickerPackLoader;
-import com.facebook.animated.webp.WebPImage;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

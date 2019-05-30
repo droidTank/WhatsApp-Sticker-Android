@@ -13,8 +13,8 @@ import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.JsonReader;
 
-import com.example.samplestickerapp.model.Sticker;
-import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.data.local.entities.Sticker;
+import com.example.samplestickerapp.data.local.entities.StickerPack;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,12 +39,12 @@ public class ContentFileParser {
         String androidPlayStoreLink = null;
         String iosAppStoreLink = null;
 
-            reader.beginArray();
-            while (reader.hasNext()) {
-                StickerPack stickerPack = readStickerPack(reader);
-                stickerPackList.add(stickerPack);
-            }
-            reader.endArray();
+        reader.beginArray();
+        while (reader.hasNext()) {
+            StickerPack stickerPack = readStickerPack(reader);
+            stickerPackList.add(stickerPack);
+        }
+        reader.endArray();
         if (stickerPackList.size() == 0) {
             throw new IllegalStateException("sticker pack list cannot be empty");
         }
@@ -67,7 +67,7 @@ public class ContentFileParser {
         String privacyPolicyWebsite = null;
         String licenseAgreementWebsite = null;
         List<Sticker> stickerList = null;
-        long totalSize = 0;
+        long totalSize = 0, download_count = 0;
         String trayImageUrl = null;
         while (reader.hasNext()) {
             String key = reader.nextName();
@@ -83,6 +83,9 @@ public class ContentFileParser {
                     break;
                 case "size":
                     totalSize = reader.nextLong();
+                    break;
+                case "download_count":
+                    download_count = reader.nextLong();
                     break;
                 case "tray_image_url":
                     trayImageUrl = reader.nextString();
@@ -111,6 +114,7 @@ public class ContentFileParser {
         final StickerPack stickerPack = new StickerPack(identifier, name, publisher, trayImageFile, publisherEmail, publisherWebsite, privacyPolicyWebsite, licenseAgreementWebsite);
         stickerPack.setStickers(stickerList);
         stickerPack.setTotalSize(totalSize);
+        stickerPack.setDownload(download_count);
         stickerPack.setTrayImageUrl(trayImageUrl);
         return stickerPack;
     }

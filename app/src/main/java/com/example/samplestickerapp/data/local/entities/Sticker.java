@@ -6,17 +6,23 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp.model;
+package com.example.samplestickerapp.data.local.entities;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
-import java.util.List;
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+import java.util.List;
+@Entity(tableName = Sticker.TABLE_NAME)
 public class Sticker implements Parcelable {
 
-
+    public static final String TABLE_NAME = "sticker";
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    private  String parentId;
     private String imageFileName;
     private List<String> emojis;
     private String imageUrl;
@@ -83,5 +89,21 @@ public class Sticker implements Parcelable {
         dest.writeString(imageFileName);
         dest.writeStringList(emojis);
         dest.writeString(imageUrl);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 }

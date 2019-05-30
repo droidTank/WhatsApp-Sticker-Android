@@ -23,8 +23,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.samplestickerapp.BuildConfig;
-import com.example.samplestickerapp.model.Sticker;
-import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.data.local.entities.Sticker;
+import com.example.samplestickerapp.data.local.entities.StickerPack;
 import com.example.samplestickerapp.utils.AppPrefManager;
 
 import java.io.File;
@@ -55,6 +55,7 @@ public class StickerContentProvider extends ContentProvider {
     public static final String LICENSE_AGREENMENT_WEBSITE = "sticker_pack_license_agreement_website";
     public static final String STICKER_PACK_TRAY_ICON_URL= "sticker_pack_tray_icon_url";
     public static final String STICKER_PACK_SIZE= "sticker_pack_size";
+    public static final String STICKER_PACK_DOWNLOADS= "sticker_pack_downloads";
 
 
 
@@ -205,7 +206,8 @@ public class StickerContentProvider extends ContentProvider {
                         PRIVACY_POLICY_WEBSITE,
                         LICENSE_AGREENMENT_WEBSITE,
                         STICKER_PACK_TRAY_ICON_URL,
-                        STICKER_PACK_SIZE
+                        STICKER_PACK_SIZE,
+                        STICKER_PACK_DOWNLOADS
                 });
         for (StickerPack stickerPack : stickerPackList) {
             MatrixCursor.RowBuilder builder = cursor.newRow();
@@ -221,6 +223,8 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(stickerPack.getLicenseAgreementWebsite());
             builder.add(stickerPack.getTrayImageUrl());
             builder.add(stickerPack.getTotalSize());
+            builder.add(stickerPack.getDownload());
+
         }
         cursor.setNotificationUri(Objects.requireNonNull(getContext()).getContentResolver(), uri);
         return cursor;

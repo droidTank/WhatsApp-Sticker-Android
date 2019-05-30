@@ -15,7 +15,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -24,12 +23,14 @@ import android.widget.Toast;
 
 import com.example.samplestickerapp.BuildConfig;
 import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.StickerApplication;
 import com.example.samplestickerapp.fcm.MyFirebaseMessagingService;
-import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.data.local.entities.StickerPack;
 import com.example.samplestickerapp.provider.StickerContentProvider;
 import com.example.samplestickerapp.provider.StickerPackLoader;
 import com.example.samplestickerapp.ui.base.BaseActivity;
 import com.example.samplestickerapp.ui.detail.StickerPackDetailsActivity;
+import com.example.samplestickerapp.ui.home.MainActivity;
 import com.example.samplestickerapp.ui.home.StickerPackListActivity;
 import com.example.samplestickerapp.utils.AppPrefManager;
 import com.example.samplestickerapp.utils.StickerPackValidator;
@@ -85,15 +86,16 @@ public class EntryActivity extends BaseActivity {
     }
 
     private void showStickerPack(ArrayList<StickerPack> stickerPackList) {
+        StickerApplication.getInstance().stickerPacks=stickerPackList;
         progressBar.setVisibility(View.GONE);
         if (stickerPackList.size() > 1 || true) {
-            final Intent intent = new Intent(this, StickerPackListActivity.class);
+            final Intent intent = new Intent(this, MainActivity.class);
             intent.putParcelableArrayListExtra(StickerPackListActivity.EXTRA_STICKER_PACK_LIST_DATA, stickerPackList);
             startActivity(intent);
             finish();
             overridePendingTransition(0, 0);
         } else {
-            final Intent intent = new Intent(this, StickerPackDetailsActivity.class);
+            final Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(StickerPackDetailsActivity.EXTRA_SHOW_UP_BUTTON, false);
             intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_DATA, stickerPackList.get(0));
             startActivity(intent);
@@ -210,7 +212,7 @@ public class EntryActivity extends BaseActivity {
             int count;
             try {
                 System.out.println("Downloading");
-                URL url = new URL("http://192.168.1.116:3000/stickers");
+                URL url = new URL("http://192.168.0.113:3000/apps/1/stickers");
                 URLConnection conection = url.openConnection();
                 conection.connect();
                 int lenghtOfFile = conection.getContentLength();
@@ -236,7 +238,8 @@ public class EntryActivity extends BaseActivity {
                 AppPrefManager.getInstance(activityWeakReference.get().getApplicationContext()).putString(AppPrefManager.JSON_FILE_PATH, stickersJsonFile.getAbsolutePath());
 
             } catch (Exception e) {
-                Log.e("Error: ", e.getMessage());
+                e.printStackTrace();
+                Log.e("Error:== ", e.getMessage());
             }
 
             return null;

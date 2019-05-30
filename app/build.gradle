@@ -21,6 +21,7 @@ android {
         buildConfigField("String",
                 "CONTENT_PROVIDER_AUTHORITY",
                 "\"${contentProviderAuthority}\"")
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         debug {
@@ -92,6 +93,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-config:16.3.0'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.vectordrawable:vectordrawable:1.0.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
@@ -101,6 +103,12 @@ dependencies {
     implementation 'com.facebook.fresco:webpsupport:1.12.0'
     implementation 'com.facebook.fresco:animated-webp:1.12.0'
     implementation 'com.google.android:flexbox:1.1.0'
+
+    def room_version = '2.0.0-beta01'
+    def lifecycle_version = '2.0.0-beta01'
+    api "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
+    api "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
 
 }
 apply plugin: 'com.google.gms.google-services'

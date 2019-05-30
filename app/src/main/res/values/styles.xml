@@ -59,4 +59,13 @@
         <item name="android:clickable">true</item>
         <item name="android:foreground">?android:attr/selectableItemBackground</item>
     </style>
+
+    <style name="BottomNavigation">
+        <item name="android:background">@color/white</item>
+        <item name="itemIconTint">@color/tab_color</item>
+        <item name="itemTextColor">@color/tab_color</item>
+        <item name="paddingStart">4dp</item>
+        <item name="paddingEnd">4dp</item>
+    </style>
+
 </resources>

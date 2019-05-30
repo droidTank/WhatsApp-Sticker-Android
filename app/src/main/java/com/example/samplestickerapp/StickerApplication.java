@@ -11,13 +11,15 @@ package com.example.samplestickerapp;
 import android.app.Application;
 import android.content.Context;
 
+import com.example.samplestickerapp.data.local.entities.StickerPack;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.firebase.FirebaseApp;
 
-import java.io.File;
+import java.util.ArrayList;
 
 public class StickerApplication extends Application {
-   public static Context appContext;
+   public static StickerApplication appContext;
+  public ArrayList<StickerPack> stickerPacks;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -29,4 +31,10 @@ public class StickerApplication extends Application {
     public static Context getAppContext() {
         return appContext;
     }
+
+    public static StickerApplication getInstance(){
+        return appContext;
+    }
+
+
 }
