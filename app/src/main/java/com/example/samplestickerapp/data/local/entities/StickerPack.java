@@ -21,9 +21,6 @@ import java.util.List;
 public class StickerPack implements Parcelable {
 
     public static final String TABLE_NAME = "sticker_pack";
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-
     public static final Creator<StickerPack> CREATOR = new Creator<StickerPack>() {
         @Override
         public StickerPack createFromParcel(Parcel in) {
@@ -39,7 +36,9 @@ public class StickerPack implements Parcelable {
     private final String publisherWebsite;
     private final String privacyPolicyWebsite;
     private final String licenseAgreementWebsite;
-    private String identifier;
+
+    @PrimaryKey()
+    private int identifier;
     private String name;
     private String publisher;
     private String trayImageFile;
@@ -51,8 +50,10 @@ public class StickerPack implements Parcelable {
     private long totalSize;
     private long download;
     private boolean isWhitelisted;
+    private Boolean isFav;
 
-    public StickerPack(String identifier, String name, String publisher, String trayImageFile, String publisherEmail, String publisherWebsite, String privacyPolicyWebsite, String licenseAgreementWebsite) {
+
+    public StickerPack(int identifier, String name, String publisher, String trayImageFile, String publisherEmail, String publisherWebsite, String privacyPolicyWebsite, String licenseAgreementWebsite) {
         this.identifier = identifier;
         this.name = name;
         this.publisher = publisher;
@@ -68,7 +69,7 @@ public class StickerPack implements Parcelable {
         publisherWebsite = in.readString();
         privacyPolicyWebsite = in.readString();
         licenseAgreementWebsite = in.readString();
-        identifier = in.readString();
+        identifier = in.readInt();
         name = in.readString();
         publisher = in.readString();
         trayImageFile = in.readString();
@@ -79,8 +80,8 @@ public class StickerPack implements Parcelable {
         totalSize = in.readLong();
         download = in.readLong();
         isWhitelisted = in.readByte() != 0;
+        isFav = in.readByte() != 0;
     }
-
 
     public void setIsWhitelisted(boolean isWhitelisted) {
         this.isWhitelisted = isWhitelisted;
@@ -102,29 +103,6 @@ public class StickerPack implements Parcelable {
         this.totalSize = totalSize;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(publisherEmail);
-        dest.writeString(publisherWebsite);
-        dest.writeString(privacyPolicyWebsite);
-        dest.writeString(licenseAgreementWebsite);
-        dest.writeString(identifier);
-        dest.writeString(name);
-        dest.writeString(publisher);
-        dest.writeString(trayImageFile);
-        dest.writeString(trayImageUrl);
-        dest.writeString(iosAppStoreLink);
-        dest.writeString(androidPlayStoreLink);
-        dest.writeTypedList(stickers);
-        dest.writeLong(totalSize);
-        dest.writeLong(download);
-        dest.writeByte((byte) (isWhitelisted ? 1 : 0));
-    }
 
     public String getPublisherEmail() {
         return publisherEmail;
@@ -142,11 +120,11 @@ public class StickerPack implements Parcelable {
         return licenseAgreementWebsite;
     }
 
-    public String getIdentifier() {
+    public int getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(String identifier) {
+    public void setIdentifier(int identifier) {
         this.identifier = identifier;
     }
 
@@ -211,11 +189,36 @@ public class StickerPack implements Parcelable {
         this.download = download;
     }
 
-    public int getId() {
-        return id;
+    public Boolean isFav() {
+        return isFav;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setFav(Boolean fav) {
+        isFav = fav;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(publisherEmail);
+        dest.writeString(publisherWebsite);
+        dest.writeString(privacyPolicyWebsite);
+        dest.writeString(licenseAgreementWebsite);
+        dest.writeInt(identifier);
+        dest.writeString(name);
+        dest.writeString(publisher);
+        dest.writeString(trayImageFile);
+        dest.writeString(trayImageUrl);
+        dest.writeString(iosAppStoreLink);
+        dest.writeString(androidPlayStoreLink);
+        dest.writeTypedList(stickers);
+        dest.writeLong(totalSize);
+        dest.writeLong(download);
+        dest.writeByte((byte) (isWhitelisted ? 1 : 0));
+        dest.writeByte(isFav != null && isFav ? (byte) 1 : (byte) 0);
     }
 }

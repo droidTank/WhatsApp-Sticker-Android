@@ -17,11 +17,12 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
 import com.example.samplestickerapp.BuildConfig;
 import com.example.samplestickerapp.R;
@@ -29,6 +30,8 @@ import com.example.samplestickerapp.StickerApplication;
 import com.example.samplestickerapp.data.local.entities.Sticker;
 import com.example.samplestickerapp.data.local.entities.StickerPack;
 import com.example.samplestickerapp.ui.base.BaseActivity;
+import com.example.samplestickerapp.utils.Analytics;
+import com.example.samplestickerapp.utils.NetworkUtils;
 import com.example.samplestickerapp.utils.WhitelistCheck;
 import com.facebook.binaryresource.BinaryResource;
 import com.facebook.binaryresource.FileBinaryResource;
@@ -48,11 +51,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class AddStickerPackActivity extends BaseActivity {
     public static final int ADD_PACK = 200;
     public static final String TAG = "AddStickerPackActivity";
+    private int stickerGroupId = 0;
 
     private static void downloadFile(String url, File outputFile) {
         try {
@@ -105,11 +110,17 @@ public abstract class AddStickerPackActivity extends BaseActivity {
     }
 
     protected void addStickerPackToWhatsApp(StickerPack pack) {
+        stickerGroupId = pack.getIdentifier();
+
+        new Thread(() -> {
+            String res = NetworkUtils.performPostCall(NetworkUtils.BASE_URL + "apps/" + NetworkUtils.APP_ID + "/group/" + pack.getIdentifier() + "/increase_download_count", new HashMap<>());
+            Log.i(TAG, "addStickerPackToWhatsApp:resp " + res);
+        }).start();
         new DownloadSticker().execute(pack);
 
     }
 
-    private void addStickerPackToWhatsApp(String identifier, String stickerPackName) {
+    private void addStickerPackToWhatsApp(int identifier, String stickerPackName) {
         try {
             //if neither WhatsApp Consumer or WhatsApp Business is installed, then tell user to install the apps.
             if (!WhitelistCheck.isWhatsAppConsumerAppInstalled(getPackageManager()) && !WhitelistCheck.isWhatsAppSmbAppInstalled(getPackageManager())) {
@@ -134,7 +145,7 @@ public abstract class AddStickerPackActivity extends BaseActivity {
         }
     }
 
-    private void launchIntentToAddPackToSpecificPackage(String identifier, String stickerPackName, String whatsappPackageName) {
+    private void launchIntentToAddPackToSpecificPackage(int identifier, String stickerPackName, String whatsappPackageName) {
         Intent intent = createIntentToAddStickerPack(identifier, stickerPackName);
         intent.setPackage(whatsappPackageName);
         try {
@@ -145,7 +156,7 @@ public abstract class AddStickerPackActivity extends BaseActivity {
     }
 
     //Handle cases either of WhatsApp are set as default app to handle this intent. We still want users to see both options.
-    private void launchIntentToAddPackToChooser(String identifier, String stickerPackName) {
+    private void launchIntentToAddPackToChooser(int identifier, String stickerPackName) {
         Intent intent = createIntentToAddStickerPack(identifier, stickerPackName);
         try {
             startActivityForResult(Intent.createChooser(intent, getString(R.string.add_to_whatsapp)), ADD_PACK);
@@ -155,10 +166,11 @@ public abstract class AddStickerPackActivity extends BaseActivity {
     }
 
     @NonNull
-    private Intent createIntentToAddStickerPack(String identifier, String stickerPackName) {
+    private Intent createIntentToAddStickerPack(int identifier, String stickerPackName) {
         Intent intent = new Intent();
         intent.setAction("com.whatsapp.intent.action.ENABLE_STICKER_PACK");
-        intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_ID, identifier);
+        String id = String.valueOf(identifier);
+        intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_ID, id);
         intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_AUTHORITY, BuildConfig.CONTENT_PROVIDER_AUTHORITY);
         intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_NAME, stickerPackName);
         return intent;
@@ -181,6 +193,8 @@ public abstract class AddStickerPackActivity extends BaseActivity {
                 } else {
                     new StickerPackNotAddedMessageFragment().show(getSupportFragmentManager(), "sticker_pack_not_added");
                 }
+            } else {
+                Analytics.trackWithGroupId(Analytics.AnalyticsEvents.STICKER_ADDED, String.valueOf(stickerGroupId));
             }
         }
     }
@@ -228,14 +242,13 @@ public abstract class AddStickerPackActivity extends BaseActivity {
 
     class DownloadSticker extends AsyncTask<StickerPack, String, Boolean> {
 
+        ProgressDialog progressDialog;
         private StickerPack stickerPack;
 
-
-        ProgressDialog progressDialog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-             progressDialog=new ProgressDialog(AddStickerPackActivity.this);
+            progressDialog = new ProgressDialog(AddStickerPackActivity.this);
             progressDialog.setTitle("Downloading");
             progressDialog.show();
 
@@ -243,7 +256,7 @@ public abstract class AddStickerPackActivity extends BaseActivity {
 
         @Override
         protected Boolean doInBackground(StickerPack... stickerPacks) {
-             stickerPack = stickerPacks[0];
+            stickerPack = stickerPacks[0];
             downloadStickers(stickerPack);
             return true;
         }
@@ -260,7 +273,7 @@ public abstract class AddStickerPackActivity extends BaseActivity {
             int totalFile = pack.getStickers().size() + 1;
             String upStr = "1/" + totalFile + " Downloading Sticker";
             publishProgress(upStr);
-            File opDir = new File(StickerApplication.getAppContext().getFilesDir(), pack.getIdentifier());
+            File opDir = new File(StickerApplication.getAppContext().getFilesDir(), String.valueOf(pack.getIdentifier()));
             downloadSticker(pack.getTrayImageUrl(), pack.getTrayImageFile(), opDir);
             upStr = "2/" + totalFile + " Downloading Sticker";
             publishProgress(upStr);

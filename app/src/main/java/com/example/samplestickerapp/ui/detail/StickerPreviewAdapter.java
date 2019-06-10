@@ -8,46 +8,47 @@
 
 package com.example.samplestickerapp.ui.detail;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.data.local.entities.StickerPack;
 
 public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewViewHolder> {
 
+    private final int cellSize;
+    private final int errorResource;
+    private final LayoutInflater layoutInflater;
+    private final StickerClickListener stickerClickListener;
     @NonNull
     private StickerPack stickerPack;
-
-    private final int cellSize;
     private int cellLimit;
     private int cellPadding;
-    private final int errorResource;
-
-    private final LayoutInflater layoutInflater;
 
     StickerPreviewAdapter(
             @NonNull final LayoutInflater layoutInflater,
             final int errorResource,
             final int cellSize,
             final int cellPadding,
-            @NonNull final StickerPack stickerPack) {
+            @NonNull final StickerPack stickerPack,StickerClickListener stickerClickListener) {
         this.cellSize = cellSize;
         this.cellPadding = cellPadding;
         this.cellLimit = 0;
         this.layoutInflater = layoutInflater;
         this.errorResource = errorResource;
         this.stickerPack = stickerPack;
+        this.stickerClickListener=stickerClickListener;
     }
 
     @NonNull
     @Override
     public StickerPreviewViewHolder onCreateViewHolder(@NonNull final ViewGroup viewGroup, final int i) {
         View itemView = layoutInflater.inflate(R.layout.sticker_image, viewGroup, false);
-        StickerPreviewViewHolder vh = new StickerPreviewViewHolder(itemView);
+        StickerPreviewViewHolder vh = new StickerPreviewViewHolder(itemView,stickerClickListener);
 
         ViewGroup.LayoutParams layoutParams = vh.stickerPreviewView.getLayoutParams();
         layoutParams.height = cellSize;
@@ -72,5 +73,9 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
             return Math.min(numberOfPreviewImagesInPack, cellLimit);
         }
         return numberOfPreviewImagesInPack;
+    }
+
+   public interface StickerClickListener {
+        void onClicked(int pos);
     }
 }

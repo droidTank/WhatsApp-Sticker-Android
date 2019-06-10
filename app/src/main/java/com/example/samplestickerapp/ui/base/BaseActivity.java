@@ -23,6 +23,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         return true;
     }
 
+
     public static final class MessageDialogFragment extends DialogFragment {
         private static final String ARG_TITLE_ID = "title_id";
         private static final String ARG_MESSAGE = "message";

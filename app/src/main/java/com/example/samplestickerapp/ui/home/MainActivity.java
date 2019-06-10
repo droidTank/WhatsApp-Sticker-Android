@@ -1,18 +1,15 @@
 package com.example.samplestickerapp.ui.home;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
-import com.example.samplestickerapp.R;
-import com.example.samplestickerapp.StickerApplication;
-import com.example.samplestickerapp.ui.detail.AddStickerPackActivity;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import android.view.MenuItem;
-import android.widget.TextView;
+import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.ui.detail.AddStickerPackActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AddStickerPackActivity {
     static {
@@ -26,13 +23,13 @@ public class MainActivity extends AddStickerPackActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    navigateToChapters("home");
+                    navigateTo(StickerPackListFragment.HOME_TYPE);
                     return true;
                 case R.id.navigation_dashboard:
-                    navigateToChapters("home");
+                    navigateTo(StickerPackListFragment.TRENDING_TYPE);
                     return true;
                 case R.id.navigation_notifications:
-                    navigateToChapters("home");
+                    navigateTo(StickerPackListFragment.FAV_TYPE);
                     return true;
             }
             return false;
@@ -43,17 +40,26 @@ public class MainActivity extends AddStickerPackActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("Home");
         BottomNavigationView navView = findViewById(R.id.nav_view);
         navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        navigateToChapters("home");
+        navigateTo(StickerPackListFragment.HOME_TYPE);
     }
 
-    public void navigateToChapters(String type) {
+    public void navigateTo(int type) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, StickerPackListFragment.newInstance(StickerApplication.getInstance().stickerPacks, type))
+                .replace(R.id.frag_container, StickerPackListFragment.newInstance(type))
                 .commit();
 
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
 
 
 }

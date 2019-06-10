@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomDataLayout">
+        <attr name="progressbar_position" format="enum">
+            <enum name="top" value="0" />
+            <enum name="center" value="1" />
+        </attr>
+        <attr name="progress_layout" format="reference" />
+
+    </declare-styleable>
+</resources>

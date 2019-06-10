@@ -11,26 +11,24 @@ package com.example.samplestickerapp.provider;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.example.samplestickerapp.BuildConfig;
+import com.example.samplestickerapp.data.local.AppDatabase;
 import com.example.samplestickerapp.data.local.entities.Sticker;
 import com.example.samplestickerapp.data.local.entities.StickerPack;
-import com.example.samplestickerapp.utils.AppPrefManager;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,36 +51,24 @@ public class StickerContentProvider extends ContentProvider {
     public static final String PUBLISHER_WEBSITE = "sticker_pack_publisher_website";
     public static final String PRIVACY_POLICY_WEBSITE = "sticker_pack_privacy_policy_website";
     public static final String LICENSE_AGREENMENT_WEBSITE = "sticker_pack_license_agreement_website";
-    public static final String STICKER_PACK_TRAY_ICON_URL= "sticker_pack_tray_icon_url";
-    public static final String STICKER_PACK_SIZE= "sticker_pack_size";
-    public static final String STICKER_PACK_DOWNLOADS= "sticker_pack_downloads";
-
+    public static final String STICKER_PACK_TRAY_ICON_URL = "sticker_pack_tray_icon_url";
+    public static final String STICKER_PACK_SIZE = "sticker_pack_size";
 
 
     public static final String STICKER_FILE_NAME_IN_QUERY = "sticker_file_name";
     public static final String STICKER_FILE_EMOJI_IN_QUERY = "sticker_emoji";
-    //my
-    public static final String STICKER_FILE_URL = "sticker_url";
-
-
-    public static Uri AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();
-
+    static final String METADATA = "metadata";
+    static final String STICKERS = "stickers";
+    static final String STICKERS_ASSET = "stickers_asset";
     /**
      * Do not change the values in the UriMatcher because otherwise, WhatsApp will not be able to fetch the stickers from the ContentProvider.
      */
     private static final UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-    static final String METADATA = "metadata";
     private static final int METADATA_CODE = 1;
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
-
-    static final String STICKERS = "stickers";
     private static final int STICKERS_CODE = 3;
-
-    static final String STICKERS_ASSET = "stickers_asset";
     private static final int STICKERS_ASSET_CODE = 4;
-
-
-    private List<StickerPack> stickerPackList;
+    public static Uri AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();
 
     @Override
     public boolean onCreate() {
@@ -100,7 +86,7 @@ public class StickerContentProvider extends ContentProvider {
         //gets the list of stickers for a sticker pack, * respresent the identifier.
         MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE);
 
-        MATCHER.addURI(authority, STICKERS_ASSET +  "/*" + "/*", STICKERS_ASSET_CODE);
+        MATCHER.addURI(authority, STICKERS_ASSET + "/*" + "/*", STICKERS_ASSET_CODE);
 
         // TODO: 4/3/19  customize
        /* for (StickerPack stickerPack : getStickerPackList()) {
@@ -133,7 +119,7 @@ public class StickerContentProvider extends ContentProvider {
     @Override
     public ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode) {
         final int matchCode = MATCHER.match(uri);
-        if (matchCode == STICKERS_ASSET_CODE ) {
+        if (matchCode == STICKERS_ASSET_CODE) {
             return getImageAsset(uri);
         }
         return null;
@@ -157,22 +143,9 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
-    private synchronized void readContentFile(@NonNull Context context) {
-        String string = AppPrefManager.getInstance(context).getString(AppPrefManager.JSON_FILE_PATH);
-        try (InputStream contentsInputStream = new FileInputStream(string)) {
-            stickerPackList = ContentFileParser.parseStickerPacks(contentsInputStream);
-        } catch (IOException | IllegalStateException e) {
-            e.printStackTrace();
-            throw new RuntimeException(string + " file has some issues: " + e.getMessage(), e);
-        }
-    }
-    public  static  boolean reinit;
 
     public List<StickerPack> getStickerPackList() {
-        if (stickerPackList == null||reinit) {
-            readContentFile(Objects.requireNonNull(getContext()));
-            reinit=false;
-        }
+        List<StickerPack> stickerPackList = AppDatabase.getInstance(getContext()).subjectDao().getAllStickerPacks();
         return stickerPackList;
     }
 
@@ -183,7 +156,7 @@ public class StickerContentProvider extends ContentProvider {
     private Cursor getCursorForSingleStickerPack(@NonNull Uri uri) {
         final String identifier = uri.getLastPathSegment();
         for (StickerPack stickerPack : getStickerPackList()) {
-            if (identifier.equals(stickerPack.getIdentifier())) {
+            if (identifier.equals(stickerPack.getIdentifier() + "")) {
                 return getStickerPackInfo(uri, Collections.singletonList(stickerPack));
             }
         }
@@ -207,7 +180,6 @@ public class StickerContentProvider extends ContentProvider {
                         LICENSE_AGREENMENT_WEBSITE,
                         STICKER_PACK_TRAY_ICON_URL,
                         STICKER_PACK_SIZE,
-                        STICKER_PACK_DOWNLOADS
                 });
         for (StickerPack stickerPack : stickerPackList) {
             MatrixCursor.RowBuilder builder = cursor.newRow();
@@ -223,7 +195,6 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(stickerPack.getLicenseAgreementWebsite());
             builder.add(stickerPack.getTrayImageUrl());
             builder.add(stickerPack.getTotalSize());
-            builder.add(stickerPack.getDownload());
 
         }
         cursor.setNotificationUri(Objects.requireNonNull(getContext()).getContentResolver(), uri);
@@ -233,11 +204,11 @@ public class StickerContentProvider extends ContentProvider {
     @NonNull
     private Cursor getStickersForAStickerPack(@NonNull Uri uri) {
         final String identifier = uri.getLastPathSegment();
-        MatrixCursor cursor = new MatrixCursor(new String[]{STICKER_FILE_NAME_IN_QUERY, STICKER_FILE_EMOJI_IN_QUERY,STICKER_FILE_URL});
+        MatrixCursor cursor = new MatrixCursor(new String[]{ STICKER_FILE_NAME_IN_QUERY, STICKER_FILE_EMOJI_IN_QUERY});
         for (StickerPack stickerPack : getStickerPackList()) {
-            if (identifier.equals(stickerPack.getIdentifier())) {
+            if (identifier.equals(String.valueOf(stickerPack.getIdentifier()))) {
                 for (Sticker sticker : stickerPack.getStickers()) {
-                    cursor.addRow(new Object[]{sticker.getImageFileName(), TextUtils.join(",", sticker.getEmojis()),sticker.getImageUrl()});
+                    cursor.addRow(new Object[]{ sticker.getImageFileName(), TextUtils.join(",", sticker.getEmojis())});
                 }
             }
         }
@@ -245,7 +216,7 @@ public class StickerContentProvider extends ContentProvider {
         return cursor;
     }
 
-    private  String getFileType(Uri uri){
+    private String getFileType(Uri uri) {
         final List<String> pathSegments = uri.getPathSegments();
         if (pathSegments.size() != 3) {
             throw new IllegalArgumentException("path segments should be 3, uri is: " + uri);
@@ -260,7 +231,7 @@ public class StickerContentProvider extends ContentProvider {
         }
         //making sure the file that is trying to be fetched is in the list of stickers.
         for (StickerPack stickerPack : getStickerPackList()) {
-            if (identifier.equals(stickerPack.getIdentifier())) {
+            if (identifier.equals(stickerPack.getIdentifier() + "")) {
                 if (fileName.equals(stickerPack.getTrayImageFile())) {
                     return "image/webp";
                 } else {
@@ -291,13 +262,13 @@ public class StickerContentProvider extends ContentProvider {
         }
         //making sure the file that is trying to be fetched is in the list of stickers.
         for (StickerPack stickerPack : getStickerPackList()) {
-            if (identifier.equals(stickerPack.getIdentifier())) {
+            if (identifier.equals(stickerPack.getIdentifier() + "")) {
                 if (fileName.equals(stickerPack.getTrayImageFile())) {
-                    return fetchFile(stickerPack.getTrayImageUrl(),uri, fileName, identifier);
+                    return fetchFile(uri, fileName, identifier);
                 } else {
                     for (Sticker sticker : stickerPack.getStickers()) {
                         if (fileName.equals(sticker.getImageFileName())) {
-                            return fetchFile(sticker.getImageUrl(),uri, fileName, identifier);
+                            return fetchFile(uri, fileName, identifier);
                         }
                     }
                 }
@@ -306,19 +277,17 @@ public class StickerContentProvider extends ContentProvider {
         return null;
     }
 
-    private ParcelFileDescriptor fetchFile(String imageUrl,@NonNull Uri uri, @NonNull String fileName, @NonNull String identifier) {
+    private ParcelFileDescriptor fetchFile(@NonNull Uri uri, @NonNull String fileName, @NonNull String identifier) {
         try {
 
-            File file=new File(getContext().getFilesDir(),identifier + "/" + fileName);
-            Log.i("provider", "fetchFile: "+file.getAbsolutePath());
-            return ParcelFileDescriptor.open(file,MODE_READ_ONLY);
+            File file = new File(getContext().getFilesDir(), identifier + "/" + fileName);
+            Log.i("provider", "fetchFile: " + file.getAbsolutePath());
+            return ParcelFileDescriptor.open(file, MODE_READ_ONLY);
         } catch (IOException e) {
             Log.e(Objects.requireNonNull(getContext()).getPackageName(), "IOException when getting asset file, uri:" + uri, e);
             return null;
         }
     }
-
-
 
 
     @Override

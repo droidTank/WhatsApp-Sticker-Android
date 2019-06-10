@@ -9,4 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <com.example.samplestickerapp.ui.custom_progress_ly.CustomDataLayout
+        android:id="@+id/custom_prog_ly"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </FrameLayout>

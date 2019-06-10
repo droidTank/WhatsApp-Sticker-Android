@@ -11,11 +11,12 @@ package com.example.samplestickerapp.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.webkit.URLUtil;
+
+import androidx.annotation.NonNull;
 
 import com.example.samplestickerapp.data.local.entities.Sticker;
 import com.example.samplestickerapp.data.local.entities.StickerPack;
@@ -45,17 +46,11 @@ public class StickerPackValidator {
     /**
      * Checks whether a sticker pack contains valid data
      */
-   public static void verifyStickerPackValidity(@NonNull Context context, @NonNull StickerPack stickerPack) throws IllegalStateException {
-       if (true)
-           return;
-       // TODO: 3/3/19
-        if (TextUtils.isEmpty(stickerPack.getIdentifier())) {
-            throw new IllegalStateException("sticker pack identifier is empty");
-        }
-        if (stickerPack.getIdentifier().length() > CHAR_COUNT_MAX) {
-            throw new IllegalStateException("sticker pack identifier cannot exceed " + CHAR_COUNT_MAX + " characters");
-        }
-        checkStringValidity(stickerPack.getIdentifier());
+    public static void verifyStickerPackValidity(@NonNull Context context, @NonNull StickerPack stickerPack) throws IllegalStateException {
+        if (true)
+            return;
+
+
         if (TextUtils.isEmpty(stickerPack.getPublisher())) {
             throw new IllegalStateException("sticker pack publisher is empty, sticker pack identifier:" + stickerPack.getIdentifier());
         }
@@ -119,7 +114,7 @@ public class StickerPackValidator {
         }
     }
 
-    private static void validateSticker(@NonNull Context context, @NonNull final String identifier, @NonNull final Sticker sticker) throws IllegalStateException {
+    private static void validateSticker(@NonNull Context context, @NonNull final int identifier, @NonNull final Sticker sticker) throws IllegalStateException {
         if (sticker.getEmojis().size() > EMOJI_LIMIT) {
             throw new IllegalStateException("emoji count exceed limit, sticker pack identifier:" + identifier + ", filename:" + sticker.getImageFileName());
         }
@@ -129,7 +124,7 @@ public class StickerPackValidator {
         validateStickerFile(context, identifier, sticker.getImageFileName());
     }
 
-    private static void validateStickerFile(@NonNull Context context, @NonNull String identifier, @NonNull final String fileName) throws IllegalStateException {
+    private static void validateStickerFile(@NonNull Context context, @NonNull int identifier, @NonNull final String fileName) throws IllegalStateException {
         try {
             final byte[] bytes = StickerPackLoader.fetchStickerAsset(identifier, fileName, context.getContentResolver());
             if (bytes.length > STICKER_FILE_SIZE_LIMIT_KB * ONE_KIBIBYTE) {

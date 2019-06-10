@@ -12,6 +12,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+        def stickerAppId = '1'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         def contentProviderAuthority = applicationId + ".stickercontentprovider"
         // Creates a placeholder property to use in the manifest.
@@ -21,6 +22,10 @@ android {
         buildConfigField("String",
                 "CONTENT_PROVIDER_AUTHORITY",
                 "\"${contentProviderAuthority}\"")
+
+        buildConfigField("int", "STICKER_APP_ID", stickerAppId)
+
+
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -43,7 +48,7 @@ task checkDebug {
     doLast {
         println("checkDebug")
         if (android.defaultConfig.applicationId.startsWith("com.whatsapp")) {
-            throw new GradleException("applicationId in defaultConfig cannot start with com.whatsapp, please change your applicationId in app/build.gradle");
+            throw new GradleException("applicationId in defaultConfig cannot start with com.whatsapp, please change your applicationId in app/build.gradle")
         }
         checkApplicationIdInDebug()
     }
@@ -55,7 +60,7 @@ private void checkApplicationIdInDebug() {
     def ignoreApplicationIdCheck = properties.getProperty('ignoreApplicationIdCheck')
     if (ignoreApplicationIdCheck == null) {
         if (android.defaultConfig.applicationId.equals("com.example.samplestickerapp")) {
-            throw new GradleException("Your applicationId is currently com.example.samplestickerapp, please change your applicationId to a different string in app/build.gradle in line 16");
+            throw new GradleException("Your applicationId is currently com.example.samplestickerapp, please change your applicationId to a different string in app/build.gradle in line 16")
         }
     } else {
         println("application id check ignored")
@@ -67,7 +72,7 @@ task checkRelease {
     doLast {
         println("checkRelease")
         if (android.defaultConfig.applicationId.startsWith("com.example")) {
-            throw new GradleException("applicationId in defaultConfig cannot start with com.example, please change your applicationId in app/build.gradle");
+            throw new GradleException("applicationId in defaultConfig cannot start with com.example, please change your applicationId in app/build.gradle")
         }
     }
 }
@@ -103,6 +108,11 @@ dependencies {
     implementation 'com.facebook.fresco:webpsupport:1.12.0'
     implementation 'com.facebook.fresco:animated-webp:1.12.0'
     implementation 'com.google.android:flexbox:1.1.0'
+    implementation 'com.facebook.shimmer:shimmer:0.4.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation "com.squareup.retrofit2:converter-gson:2.4.0"
+
 
     def room_version = '2.0.0-beta01'
     def lifecycle_version = '2.0.0-beta01'

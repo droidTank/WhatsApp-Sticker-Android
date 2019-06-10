@@ -19,6 +19,7 @@ import com.example.samplestickerapp.data.local.entities.StickerPack;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +33,16 @@ public class ContentFileParser {
             return readStickerPacks(reader);
         }
     }
+
+
+    @NonNull
+    public static List<StickerPack> parseStickerPacks(@NonNull String json) throws IOException, IllegalStateException {
+        try (JsonReader reader = new JsonReader(new StringReader(json))) {
+            return readStickerPacks(reader);
+        }
+    }
+
+
 
     @NonNull
     private static List<StickerPack> readStickerPacks(@NonNull JsonReader reader) throws IOException, IllegalStateException {
@@ -58,7 +69,7 @@ public class ContentFileParser {
     @NonNull
     private static StickerPack readStickerPack(@NonNull JsonReader reader) throws IOException, IllegalStateException {
         reader.beginObject();
-        String identifier = null;
+        int identifier = 0;
         String name = null;
         String publisher = "sticker";
         String trayImageFile = null;
@@ -73,7 +84,7 @@ public class ContentFileParser {
             String key = reader.nextName();
             switch (key) {
                 case "id":
-                    identifier = reader.nextString();
+                    identifier = reader.nextInt();
                     break;
                 case "name":
                     name = reader.nextString();
@@ -95,7 +106,7 @@ public class ContentFileParser {
             }
         }
         trayImageFile = name + ".png";
-        if (TextUtils.isEmpty(identifier)) {
+        if (identifier==0) {
             throw new IllegalStateException("identifier cannot be empty");
         }
         if (TextUtils.isEmpty(name)) {
@@ -106,9 +117,6 @@ public class ContentFileParser {
         }
         if (stickerList == null || stickerList.size() == 0) {
             throw new IllegalStateException("sticker list is empty");
-        }
-        if (identifier.contains("..") || identifier.contains("/")) {
-            throw new IllegalStateException("identifier should not contain .. or / to prevent directory traversal");
         }
         reader.endObject();
         final StickerPack stickerPack = new StickerPack(identifier, name, publisher, trayImageFile, publisherEmail, publisherWebsite, privacyPolicyWebsite, licenseAgreementWebsite);
@@ -127,9 +135,13 @@ public class ContentFileParser {
             reader.beginObject();
             String imageFile = null;
             String imageUrl = null;
+            int sticker_id=0;
             while (reader.hasNext()) {
                 final String key = reader.nextName();
-                if ("file_name".equals(key)) {
+                if ("sticker_id".equals(key)) {
+                    sticker_id = reader.nextInt();
+                }
+                else if ("file_name".equals(key)) {
                     imageFile = reader.nextString();
                 } else if ("file_url".equals(key)) {
                     imageUrl = reader.nextString();
@@ -147,7 +159,7 @@ public class ContentFileParser {
             if (imageFile != null && (imageFile.contains("..") || imageFile.contains("/"))) {
                 throw new IllegalStateException("the file name should not contain .. or / to prevent directory traversal, image file is:" + imageFile);
             }
-            stickerList.add(new Sticker(imageFile, getEmojis(stickerList.size()), imageUrl));
+            stickerList.add(new Sticker(sticker_id,imageFile, getEmojis(stickerList.size()), imageUrl));
         }
         reader.endArray();
         return stickerList;

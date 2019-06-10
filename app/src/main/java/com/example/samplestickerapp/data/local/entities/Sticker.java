@@ -22,12 +22,13 @@ public class Sticker implements Parcelable {
     public static final String TABLE_NAME = "sticker";
     @PrimaryKey(autoGenerate = true)
     private int id;
-    private  String parentId;
+    private  int parentId;
     private String imageFileName;
     private List<String> emojis;
     private String imageUrl;
 
-    public Sticker(String imageFileName, List<String> emojis,String imageUrl) {
+    public Sticker(int id,String imageFileName, List<String> emojis,String imageUrl) {
+        this.id=id;
         this.imageFileName = imageFileName;
         this.emojis = emojis;
         this.imageUrl=imageUrl;
@@ -99,11 +100,11 @@ public class Sticker implements Parcelable {
         this.id = id;
     }
 
-    public String getParentId() {
+    public int getParentId() {
         return parentId;
     }
 
-    public void setParentId(String parentId) {
+    public void setParentId(int parentId) {
         this.parentId = parentId;
     }
 }

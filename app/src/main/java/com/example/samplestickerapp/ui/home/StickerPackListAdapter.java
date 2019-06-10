@@ -12,16 +12,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.data.local.entities.StickerPack;
@@ -33,9 +32,9 @@ import java.util.List;
 
 public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackListItemViewHolder> {
     @NonNull
-    private List<StickerPack> stickerPacks;
-    @NonNull
     private final OnAddButtonClickedListener onAddButtonClickedListener;
+    @NonNull
+    private List<StickerPack> stickerPacks;
     private int maxNumberOfStickersInARow;
 
     StickerPackListAdapter(@NonNull List<StickerPack> stickerPacks, @NonNull OnAddButtonClickedListener onAddButtonClickedListener) {
@@ -56,7 +55,7 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
     public void onBindViewHolder(@NonNull final StickerPackListItemViewHolder viewHolder, final int index) {
         StickerPack pack = stickerPacks.get(index);
         final Context context = viewHolder.filesizeView.getContext();
-        viewHolder.filesizeView.setText("Downloads:"+ pack.getDownload());
+        viewHolder.filesizeView.setText("Downloads:" + pack.getDownload());
 
         viewHolder.titleView.setText(pack.getName());
         viewHolder.container.setOnClickListener(view -> {
@@ -68,6 +67,7 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
         viewHolder.imageRowView.removeAllViews();
         //if this sticker pack contains less stickers than the max, then take the smaller size.
         int actualNumberOfStickersToShow = Math.min(maxNumberOfStickersInARow, pack.getStickers().size());
+        Log.i("aaa", "onBindViewHolder: =" + pack.getStickers().size());
         for (int i = 0; i < actualNumberOfStickersToShow; i++) {
             final SimpleDraweeView rowImage = (SimpleDraweeView) LayoutInflater.from(context).inflate(R.layout.sticker_pack_list_item_image, viewHolder.imageRowView, false);
 
@@ -78,7 +78,7 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
                 rowImage.setLayoutParams(lp);
             }
             rowImage.setImageURI(pack.getStickers().get(i).getImageUrl());
-            Log.i("aaa", "onBindViewHolder: =" + pack.getStickers().get(i).getImageUrl() + "-");
+
             viewHolder.imageRowView.addView(rowImage);
         }
         setAddButtonAppearance(viewHolder.addButton, pack);
@@ -86,7 +86,11 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
 
     private void setAddButtonAppearance(ImageView addButton, StickerPack pack) {
 
-        addButton.setImageResource(R.drawable.ic_favorite_border);
+        if (pack.isFav() != null && pack.isFav())
+            addButton.setImageResource(R.drawable.ic_favorite);
+        else
+            addButton.setImageResource(R.drawable.ic_favorite_border);
+
         addButton.setOnClickListener(v -> onAddButtonClickedListener.onAddButtonClicked(pack));
         TypedValue outValue = new TypedValue();
         addButton.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);

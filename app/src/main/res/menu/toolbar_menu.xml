@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_info"
-        android:icon="@drawable/sticker_3rdparty_info"
-        android:title="@string/more_info_button"
+        android:id="@+id/action_share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="Share"
         app:showAsAction="always" />
 </menu>

@@ -38,6 +38,10 @@ public abstract class AppDatabase extends RoomDatabase {
         return sInstance;
     }
 
+    public static AppDatabase getInstance() {
+        return sInstance;
+    }
+
     public abstract StickerDao subjectDao();
 
 

@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 public class AppPrefManager {
     static AppPrefManager instance;
     private final SharedPreferences sharedPref;
-    public static  final  String JSON_FILE_PATH="file_path";
 
     private AppPrefManager(Context context) {
         sharedPref = context.getSharedPreferences("app_data", Context.MODE_PRIVATE);

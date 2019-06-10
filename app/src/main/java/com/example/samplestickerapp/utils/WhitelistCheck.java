@@ -30,7 +30,7 @@ public class WhitelistCheck {
     private static String QUERY_PATH = "is_whitelisted";
     private static String QUERY_RESULT_COLUMN_NAME = "result";
 
-    public static boolean isWhitelisted(@NonNull Context context, @NonNull String identifier) {
+    public static boolean isWhitelisted(@NonNull Context context, @NonNull int identifier) {
         try {
             if (!isWhatsAppConsumerAppInstalled(context.getPackageManager()) && !isWhatsAppSmbAppInstalled(context.getPackageManager())) {
                 return false;
@@ -43,7 +43,9 @@ public class WhitelistCheck {
         }
     }
 
-    private static boolean isWhitelistedFromProvider(@NonNull Context context, @NonNull String identifier, String whatsappPackageName) {
+    private static boolean isWhitelistedFromProvider(@NonNull Context context, @NonNull int id, String whatsappPackageName) {
+        String identifier = String.valueOf(id);
+
         final PackageManager packageManager = context.getPackageManager();
         if (isPackageInstalled(whatsappPackageName, packageManager)) {
             final String whatsappProviderAuthority = whatsappPackageName + CONTENT_PROVIDER;
@@ -88,11 +90,11 @@ public class WhitelistCheck {
         return WhitelistCheck.isPackageInstalled(SMB_WHATSAPP_PACKAGE_NAME, packageManager);
     }
 
-    public static boolean isStickerPackWhitelistedInWhatsAppConsumer(@NonNull Context context, @NonNull String identifier) {
+    public static boolean isStickerPackWhitelistedInWhatsAppConsumer(@NonNull Context context, @NonNull int identifier) {
         return isWhitelistedFromProvider(context, identifier, CONSUMER_WHATSAPP_PACKAGE_NAME);
     }
 
-    public static boolean isStickerPackWhitelistedInWhatsAppSmb(@NonNull Context context, @NonNull String identifier) {
+    public static boolean isStickerPackWhitelistedInWhatsAppSmb(@NonNull Context context, @NonNull int identifier) {
         return isWhitelistedFromProvider(context, identifier, SMB_WHATSAPP_PACKAGE_NAME);
     }
 }
